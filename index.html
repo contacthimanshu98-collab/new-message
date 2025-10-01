@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>For Mayalu</title>
+<style>
+  :root{
+    --bg:#000;
+    --glow:#33ff77;
+    --accent:#7CFC00;
+  }
+  html,body{height:100%;margin:0;background:var(--bg);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;}
+  canvas{display:block;position:fixed;inset:0;z-index:0;}
+  .center {position:relative; z-index:2; height:100%; display:flex; align-items:center; justify-content:center; pointer-events:none;}
+  .panel{
+    pointer-events:auto; text-align:center; color: var(--glow);
+    background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.45));
+    padding: 18px 22px; border-radius:12px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.8), 0 0 18px rgba(51,255,119,0.06) inset;
+    border: 1px solid rgba(51,255,119,0.07);
+    min-width: 260px; max-width: 92%;
+  }
+  h1{margin:0; font-size:22px; letter-spacing:2px; text-shadow:0 0 14px rgba(51,255,119,0.15),0 0 36px rgba(51,255,119,0.05); opacity:0.85;}
+  p.hint{margin:10px 0 0; font-size:13px; color:var(--accent); opacity:0.9;}
+  .message{
+    margin-top:16px; padding:12px 14px; border-radius:8px;
+    background: linear-gradient(180deg, rgba(51,255,119,0.03), rgba(51,255,119,0.01));
+    color: #001b0a; font-weight:700; display:block;
+    filter: drop-shadow(0 6px 18px rgba(0,0,0,0.6));
+    transform: translateY(8px) scale(0.98);
+    transition: transform 360ms cubic-bezier(.2,.9,.3,1), opacity 360ms;
+    opacity:0; backdrop-filter: blur(6px) saturate(120%);
+    font-family: monospace; font-size:18px;
+  }
+  .message.show{opacity:1; transform: translateY(0) scale(1);}
+  .btn{
+    margin-top:12px; padding:8px 12px; border-radius:8px; font-weight:600;
+    background:transparent; color:var(--glow); border:1px solid rgba(51,255,119,0.1);
+    cursor:pointer; font-size:13px;
+  }
+  @media (max-width:420px){ h1{font-size:18px} .panel{padding:14px} }
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+
+<div class="center">
+  <div class="panel" id="panel">
+    <h1>For Mayalu</h1>
+    <p class="hint">Tap anywhere to reveal a message ✨</p>
+    <div class="message" id="message">I love you mayalu, meri pyariiii mayaluuuu, muahhh ❤️💋</div>
+    <button class="btn" id="replay">Play Again</button>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let w = canvas.width = innerWidth;
+let h = canvas.height = innerHeight;
+
+window.addEventListener('resize', ()=>{ w=canvas.width=innerWidth; h=canvas.height=innerHeight; initDrops(); });
+
+const chars = '01@#₩$%&*<>?[]{}abcdefghijklmnopqrstuvwxyz';
+const fontSize = 14*(Math.min(w,600)/600);
+let columns = Math.floor(w/fontSize);
+let drops = [];
+
+function initDrops(){ columns=Math.floor(w/fontSize); drops=new Array(columns).fill(0).map(()=>Math.floor(Math.random()*h)); }
+initDrops();
+
+function draw(){
+  ctx.fillStyle='rgba(0,0,0,0.15)';
+  ctx.fillRect(0,0,w,h);
+  ctx.font=`${Math.floor(fontSize)}px monospace`;
+  for(let i=0;i<columns;i++){
+    const x=i*fontSize;
+    const y=drops[i]*fontSize;
+    const text=chars.charAt(Math.floor(Math.random()*chars.length));
+    ctx.fillStyle='rgba(140,255,180,0.9)';
+    ctx.fillText(text,x,y);
+    ctx.fillStyle='rgba(30,80,40,0.6)';
+    ctx.fillText(text,x,y-fontSize*2.2);
+    drops[i]++;
+    if(drops[i]*fontSize>h && Math.random()>0.975) drops[i]=0;
+  }
+  requestAnimationFrame(draw);
+}
+draw();
+
+// --- Sci-Fi rotating message ---
+const panel=document.getElementById('panel');
+const messageEl=document.getElementById('message');
+const replayBtn=document.getElementById('replay');
+
+const finalMessage = "I love you mayalu, meri pyariiii mayaluuuu, muahhh ❤️💋";
+
+function playAnimation(){
+  messageEl.textContent = '';
+  messageEl.classList.add('show');
+  let i=0;
+  let display = Array(finalMessage.length).fill(' ');
+  const interval = setInterval(()=>{
+    if(i>=finalMessage.length){ clearInterval(interval); return; }
+    for(let j=i;j<Math.min(i+6,finalMessage.length);j++){
+      const randChar = chars.charAt(Math.floor(Math.random()*chars.length));
+      display[j] = randChar;
+    }
+    display[i] = finalMessage[i];
+    messageEl.textContent = display.join('');
+    i++;
+  }, 80);
+}
+
+function hideMessage(){
+  messageEl.textContent = '';
+  messageEl.classList.remove('show');
+}
+
+// Play animation every click
+document.body.addEventListener('click', ()=>{
+  hideMessage();
+  playAnimation();
+});
+panel.addEventListener('click',(e)=>{
+  e.stopPropagation();
+  hideMessage();
+  playAnimation();
+});
+replayBtn.addEventListener('click',(e)=>{
+  e.stopPropagation();
+  hideMessage();
+  playAnimation();
+});
+</script>
+
+</body>
+</html>
